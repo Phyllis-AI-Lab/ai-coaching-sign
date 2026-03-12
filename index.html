@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI 賦能顧問服務合約聲明</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans TC', Arial, sans-serif;
+  background: linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 100%);
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+}
+.container {
+  max-width: 760px;
+  background: white;
+  padding: 36px 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+  margin: auto;
+}
+.header-banner {
+  background: linear-gradient(135deg, #0d1b3e, #1a3a6b);
+  color: #d4a832;
+  padding: 28px 24px 20px;
+  border-radius: 8px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.header-banner h1 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+}
+.header-banner .subtitle {
+  font-size: 0.88rem;
+  color: #e8c96a;
+  opacity: 0.85;
+  margin: 0;
+}
+.section-title {
+  color: #0d1b3e;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-left: 4px solid #d4a832;
+  padding-left: 10px;
+  margin: 24px 0 12px;
+}
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.93rem;
+}
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: #1a3a6b;
+}
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+.form-row .form-group {
+  flex: 1;
+}
+.terms-box {
+  border: 1.5px solid #dde3f0;
+  border-radius: 8px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  background: #f8f9fd;
+  max-height: 420px;
+  overflow-y: auto;
+  font-size: 0.92rem;
+  line-height: 1.75;
+  color: #2c2c2c;
+}
+.terms-box h4 {
+  color: #0d1b3e;
+  margin: 16px 0 6px;
+  font-size: 0.97rem;
+}
+.terms-box h4:first-child { margin-top: 0; }
+.terms-box ul {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+.terms-box li { margin-bottom: 4px; }
+.terms-box strong { color: #0d1b3e; }
+.terms-box .tag {
+  display: inline-block;
+  background: #0d1b3e;
+  color: #d4a832;
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 4px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.signature-label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  font-size: 0.93rem;
+}
+.signature-hint {
+  font-size: 0.82rem;
+  color: #888;
+  margin-bottom: 8px;
+}
+.signature-container {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  margin-bottom: 10px;
+}
+.signature-box {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: 1.5px solid #c8cfe0;
+  border-radius: 6px;
+  background: white;
+  touch-action: none;
+  cursor: crosshair;
+}
+.signature-watermark {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: #e2e6f0;
+  font-size: 0.85rem;
+  pointer-events: none;
+  user-select: none;
+}
+.btn {
+  padding: 11px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 0.93rem;
+  font-weight: 600;
+  transition: opacity 0.2s, transform 0.1s;
+  color: white;
+  margin-top: 8px;
+  margin-right: 8px;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: linear-gradient(135deg, #0d1b3e, #1a3a6b); }
+.btn-clear { background: #c0392b; }
+.btn-print { background: #27ae60; }
+.btn-download { background: #2980b9; }
+.btn-sheets { background: #8e44ad; }
+.btn-back { background: #7f8c8d; }
+.divider {
+  border: none;
+  border-top: 1.5px solid #eaecf5;
+  margin: 24px 0;
+}
+.result-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.result-info-item {
+  background: #f8f9fd;
+  border: 1px solid #dde3f0;
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+.result-info-item .key {
+  font-size: 0.78rem;
+  color: #888;
+  margin-bottom: 2px;
+}
+.result-info-item .val {
+  font-size: 0.97rem;
+  font-weight: 600;
+  color: #0d1b3e;
+}
+#loading {
+  display: none;
+  text-align: center;
+  margin-top: 14px;
+}
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1a3a6b;
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  animation: spin 0.9s linear infinite;
+  margin: 0 auto 8px;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.message {
+  padding: 10px 14px;
+  margin-top: 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.settings-toggle {
+  cursor: pointer;
+  color: #1a3a6b;
+  text-decoration: underline;
+  font-size: 0.83rem;
+  margin-top: 12px;
+  display: inline-block;
+}
+.hidden-settings { display: none; }
+.action-buttons { margin-top: 16px; }
+.gold-badge {
+  display: inline-block;
+  background: #d4a832;
+  color: #0d1b3e;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  letter-spacing: 0.04em;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+@media (max-width: 600px) {
+  .container { padding: 20px 16px; }
+  .form-row { flex-direction: column; gap: 0; }
+  .btn { display: block; width: 100%; margin-right: 0; }
+  .result-info-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- 表單頁 -->
+<div class="container" id="formContainer">
+  <div class="header-banner">
+    <h1>📝 AI 賦能顧問服務</h1>
+    <p class="subtitle">合約聲明條款確認書　<span style="opacity:0.7">｜　郭霽 AI 賦能師 × 內容自動化架構師</span></p>
+  </div>
+
+  <div class="section-title">基本資料</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="clientName">委託方 / 公司名稱 <span style="color:#c0392b">*</span></label>
+      <input type="text" id="clientName" placeholder="例：開京建設股份有限公司" required>
+    </div>
+    <div class="form-group">
+      <label for="contactName">簽署人姓名 <span style="color:#c0392b">*</span></label>
+      <input type="text" id="contactName" placeholder="例：王小明" required>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="contactTitle">職稱</label>
+      <input type="text" id="contactTitle" placeholder="例：負責人 / 執行長">
+    </div>
+    <div class="form-group">
+      <label for="contactInfo">聯絡方式 <span style="color:#c0392b">*</span></label>
+      <input type="text" id="contactInfo" placeholder="Email 或電話" required>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="projectName">專案 / 課程名稱</label>
+      <input type="text" id="projectName" placeholder="例：三階段 AI 賦能旗艦課程">
+    </div>
+    <div class="form-group">
+      <label for="signDate">簽署日期 <span style="color:#c0392b">*</span></label>
+      <input type="date" id="signDate" required>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title">合約聲明條款</div>
+  <div class="terms-box" id="termsContent">
+
+    <p style="margin-top:0;color:#555;font-size:0.9rem;">以下為本顧問專案之完整聲明條款，請詳細閱讀後於下方簽署。</p>
+
+    <h4>📋 交付物界定 <span class="tag">第一條</span></h4>
+    <p>本顧問專案之核心交付物為「<strong>專屬企業數據藍圖</strong>」、「<strong>AI 自動化情境體驗原型 (PoC)</strong>」及「<strong>課後實戰備忘錄</strong>」。為保護核心技術架構，本專案恕不提供完整課程簡報檔案（PPT/PDF）或原始碼解說文件。</p>
+
+    <h4>🔍 專案性質聲明 <span class="tag">第二條</span></h4>
+    <p>本專案為「<strong>技術賦能與架構教學</strong>」顧問服務，非傳統軟體外包開發。課程中實作之「情境體驗原型」旨在<strong>讓學員領受 AI 串接與自動化之決策情境</strong>，學員需理解並具備未來自主使用 AI 工具（如 Claude 等）進行維護與擴充之思維。</p>
+
+    <h4>⚖️ 智慧財產權 <span class="tag">第三條</span></h4>
+    <p>課程中所展示之「<strong>雙核心系統架構</strong>」、「<strong>運算邏輯模型</strong>」及「<strong>教學方法論</strong>」，其智慧財產權均屬【郭霽】所有。學員於專案中建置之「<strong>企業專屬數據</strong>」則完全歸屬客戶方所有。</p>
+
+    <h4>📌 授權範圍 <span class="tag">第四條</span></h4>
+    <p>專案所提供之《實戰備忘錄》及系統指令範本，<strong>僅授權貴公司內部營運使用</strong>。未經書面同意，不得以任何形式重製、散佈、公開展示或轉售予第三方。</p>
+
+    <h4>✅ 簽署確認</h4>
+    <p>委託方特此確認：已詳細閱讀並充分理解以上所有條款內容，同意並接受本合約聲明之全部規範。</p>
+
+  </div>
+
+  <div class="section-title">電子簽名</div>
+  <div class="signature-hint">請在下方框內以手指或滑鼠完成親筆簽名</div>
+  <div class="signature-container">
+    <canvas id="signatureCanvas" class="signature-box"></canvas>
+    <div class="signature-watermark">在此處簽名</div>
+  </div>
+  <button class="btn btn-clear" onclick="clearSignature()">清除簽名</button>
+
+  <hr class="divider">
+  <button class="btn btn-primary" onclick="submitForm()" style="font-size:1rem;padding:13px 28px;">確認並提交簽署</button>
+
+  <div style="margin-top:16px;">
+    <span class="settings-toggle" onclick="toggleSettings()">進階設定（管理員）</span>
+    <div class="hidden-settings" id="settingsArea" style="margin-top:10px;">
+      <div class="form-group">
+        <label for="sheetsURL">Google Sheets API 網址：</label>
+        <input type="text" id="sheetsURL" value="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" placeholder="貼上 Apps Script 部署網址">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 結果頁 -->
+<div class="container" id="resultContainer" style="display:none;">
+  <div class="header-banner">
+    <h1>✅ 簽署完成</h1>
+    <p class="subtitle">感謝您完成 AI 賦能顧問服務合約聲明書確認</p>
+  </div>
+
+  <div class="result-info-grid">
+    <div class="result-info-item">
+      <div class="key">委託方 / 公司名稱</div>
+      <div class="val" id="resClientName"></div>
+    </div>
+    <div class="result-info-item">
+      <div class="key">簽署人姓名</div>
+      <div class="val" id="resContactName"></div>
+    </div>
+    <div class="result-info-item">
+      <div class="key">職稱</div>
+      <div class="val" id="resContactTitle">—</div>
+    </div>
+    <div class="result-info-item">
+      <div class="key">聯絡方式</div>
+      <div class="val" id="resContactInfo"></div>
+    </div>
+    <div class="result-info-item">
+      <div class="key">專案 / 課程名稱</div>
+      <div class="val" id="resProjectName">—</div>
+    </div>
+    <div class="result-info-item">
+      <div class="key">簽署日期</div>
+      <div class="val" id="resSignDate"></div>
+    </div>
+  </div>
+
+  <div class="section-title">合約聲明條款（確認版本）</div>
+  <div class="terms-box" id="resTermsContent" style="max-height:300px;"></div>
+
+  <div class="section-title">電子簽名</div>
+  <img id="resSignature" style="border:1.5px solid #c8cfe0;border-radius:6px;width:100%;height:160px;background:white;display:block;"><br>
+
+  <div id="submitStatus" class="message" style="display:none;"></div>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p style="color:#555;font-size:0.9rem;">正在傳送資料至 Google Sheets…</p>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn btn-print" onclick="printForm()">🖨️ 列印</button>
+    <button class="btn btn-download" onclick="downloadPDF()">⬇️ 下載 PDF</button>
+    <button class="btn btn-sheets" onclick="submitToGoogleSheets()">📊 存入 Google Sheets</button>
+    <button class="btn btn-back" onclick="goBack()">← 返回表單</button>
+  </div>
+</div>
+
+<script>
+// jsPDF 載入
+let jsPDF;
+window.addEventListener('load', () => {
+  if (window.jspdf && window.jspdf.jsPDF) jsPDF = window.jspdf.jsPDF;
+  else if (window.jsPDF) jsPDF = window.jsPDF;
+
+  resizeCanvas();
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('signDate').value = today;
+});
+
+// Canvas 簽名板
+const canvas = document.getElementById('signatureCanvas');
+const ctx = canvas.getContext('2d');
+let isDrawing = false, lastX = 0, lastY = 0;
+
+function resizeCanvas() {
+  const w = canvas.parentElement.clientWidth;
+  canvas.width = w;
+  canvas.height = 160;
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, w, 160);
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#1a1a2e';
+}
+window.addEventListener('resize', resizeCanvas);
+
+function drawLine(x1, y1, x2, y2) {
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+}
+canvas.addEventListener('mousedown', e => { isDrawing = true; const r = canvas.getBoundingClientRect(); lastX = e.clientX - r.left; lastY = e.clientY - r.top; });
+canvas.addEventListener('mousemove', e => { if (!isDrawing) return; const r = canvas.getBoundingClientRect(); const x = e.clientX - r.left, y = e.clientY - r.top; drawLine(lastX, lastY, x, y); lastX = x; lastY = y; });
+canvas.addEventListener('mouseup', () => isDrawing = false);
+canvas.addEventListener('mouseleave', () => isDrawing = false);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); if (e.touches.length !== 1) return; const t = e.touches[0], r = canvas.getBoundingClientRect(); lastX = t.clientX - r.left; lastY = t.clientY - r.top; isDrawing = true; }, { passive: false });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!isDrawing || e.touches.length !== 1) return; const t = e.touches[0], r = canvas.getBoundingClientRect(); const x = t.clientX - r.left, y = t.clientY - r.top; drawLine(lastX, lastY, x, y); lastX = x; lastY = y; }, { passive: false });
+canvas.addEventListener('touchend', e => { e.preventDefault(); isDrawing = false; }, { passive: false });
+document.body.addEventListener('touchmove', e => { if (isDrawing) e.preventDefault(); }, { passive: false });
+
+function clearSignature() {
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function toggleSettings() {
+  const s = document.getElementById('settingsArea');
+  s.classList.toggle('hidden-settings');
+}
+
+function hasSignature() {
+  const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i] < 250 || d[i+1] < 250 || d[i+2] < 250) return true;
+  }
+  return false;
+}
+
+function validateForm() {
+  const fields = ['clientName', 'contactName', 'contactInfo', 'signDate'];
+  for (const f of fields) {
+    if (!document.getElementById(f).value.trim()) {
+      alert('請填寫所有必填欄位（標有 * 者）'); return false;
+    }
+  }
+  if (!hasSignature()) { alert('請完成電子簽名'); return false; }
+  return true;
+}
+
+function submitForm() {
+  if (!validateForm()) return;
+  document.getElementById('resClientName').innerText = document.getElementById('clientName').value;
+  document.getElementById('resContactName').innerText = document.getElementById('contactName').value;
+  document.getElementById('resContactTitle').innerText = document.getElementById('contactTitle').value || '—';
+  document.getElementById('resContactInfo').innerText = document.getElementById('contactInfo').value;
+  document.getElementById('resProjectName').innerText = document.getElementById('projectName').value || '—';
+  document.getElementById('resSignDate').innerText = document.getElementById('signDate').value;
+  document.getElementById('resSignature').src = canvas.toDataURL();
+  document.getElementById('resTermsContent').innerHTML = document.getElementById('termsContent').innerHTML;
+
+  document.getElementById('formContainer').style.display = 'none';
+  document.getElementById('resultContainer').style.display = 'block';
+  document.getElementById('submitStatus').style.display = 'none';
+  window.scrollTo(0, 0);
+}
+
+function goBack() {
+  document.getElementById('formContainer').style.display = 'block';
+  document.getElementById('resultContainer').style.display = 'none';
+}
+
+function printForm() { window.print(); }
+
+function downloadPDF() {
+  const el = document.getElementById('resultContainer');
+  html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(c => {
+    if (!jsPDF) { alert('PDF 函式庫尚未載入，請稍後再試'); return; }
+    const img = c.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const w = 210, h = c.height * w / c.width;
+    pdf.addImage(img, 'PNG', 0, 0, w, h);
+    pdf.save('AI賦能顧問服務合約聲明書.pdf');
+  }).catch(() => alert('PDF 生成失敗，請稍後再試'));
+}
+
+function compressSignature(dataURL, quality) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      const max = 300;
+      let w = img.width, h = img.height;
+      if (w > max) { h = Math.round(h * max / w); w = max; }
+      c.width = w; c.height = h;
+      const cx = c.getContext('2d');
+      cx.fillStyle = 'white'; cx.fillRect(0, 0, w, h);
+      cx.drawImage(img, 0, 0, w, h);
+      res(c.toDataURL('image/jpeg', quality || 0.7));
+    };
+    img.onerror = rej;
+    img.src = dataURL;
+  });
+}
+
+async function submitToGoogleSheets() {
+  const sheetsURL = document.getElementById('sheetsURL').value;
+  if (!sheetsURL || sheetsURL.includes('YOUR_SCRIPT_ID')) {
+    const s = document.getElementById('submitStatus');
+    s.style.display = 'block';
+    s.className = 'message error';
+    s.innerText = '請先至「進階設定」填入正確的 Google Sheets API 網址';
+    return;
+  }
+
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('submitStatus').style.display = 'none';
+
+  const sig = await compressSignature(canvas.toDataURL(), 0.5);
+  const data = {
+    clientName: document.getElementById('clientName').value,
+    contactName: document.getElementById('contactName').value,
+    contactTitle: document.getElementById('contactTitle').value,
+    contactInfo: document.getElementById('contactInfo').value,
+    projectName: document.getElementById('projectName').value,
+    signDate: document.getElementById('signDate').value,
+    signature: sig,
+    secretKey: 'AIEnablement2025'
+  };
+
+  try {
+    await fetch(sheetsURL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    document.getElementById('loading').style.display = 'none';
+    const s = document.getElementById('submitStatus');
+    s.style.display = 'block';
+    s.className = 'message success';
+    s.innerText = '✅ 資料已成功傳送至 Google Sheets！';
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    const s = document.getElementById('submitStatus');
+    s.style.display = 'block';
+    s.className = 'message error';
+    s.innerText = '⚠️ 傳送失敗，請檢查 API 網址後重試';
+  }
+}
+</script>
+</body>
+</html>
