@@ -222,15 +222,6 @@ body {
 }
 .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-.settings-toggle {
-  cursor: pointer;
-  color: #1a3a6b;
-  text-decoration: underline;
-  font-size: 0.83rem;
-  margin-top: 12px;
-  display: inline-block;
-}
-.hidden-settings { display: none; }
 .action-buttons { margin-top: 16px; }
 .gold-badge {
   display: inline-block;
@@ -254,7 +245,6 @@ body {
 </head>
 <body>
 
-<!-- 表單頁 -->
 <div class="container" id="formContainer">
   <div class="header-banner">
     <h1>📝 AI 賦能顧問服務</h1>
@@ -328,18 +318,10 @@ body {
   <hr class="divider">
   <button class="btn btn-primary" onclick="submitForm()" style="font-size:1rem;padding:13px 28px;">確認並提交簽署</button>
 
-  <div style="margin-top:16px;">
-    <span class="settings-toggle" onclick="toggleSettings()">進階設定（管理員）</span>
-    <div class="hidden-settings" id="settingsArea" style="margin-top:10px;">
-      <div class="form-group">
-        <label for="sheetsURL">Google Sheets API 網址：</label>
-        <input type="text" id="sheetsURL" value="https://script.google.com/macros/s/AKfycbzVwhaB9tKSCDHsnMfdG6nh608z_a_2Xg18Vpe1zLlcf2COMLjjwGGFwUKNt3aY9XZI/exec" placeholder="貼上 Apps Script 部署網址">
-      </div>
-    </div>
-  </div>
+  <input type="hidden" id="sheetsURL" value="https://script.google.com/macros/s/AKfycbzVwhaB9tKSCDHsnMfdG6nh608z_a_2Xg18Vpe1zLlcf2COMLjjwGGFwUKNt3aY9XZI/exec">
+
 </div>
 
-<!-- 結果頁 -->
 <div class="container" id="resultContainer" style="display:none;">
   <div class="header-banner">
     <h1>✅ 簽署完成</h1>
@@ -440,11 +422,6 @@ function clearSignature() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function toggleSettings() {
-  const s = document.getElementById('settingsArea');
-  s.classList.toggle('hidden-settings');
-}
-
 function hasSignature() {
   const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
   for (let i = 0; i < d.length; i += 4) {
@@ -525,7 +502,7 @@ async function submitToGoogleSheets() {
     const s = document.getElementById('submitStatus');
     s.style.display = 'block';
     s.className = 'message error';
-    s.innerText = '請先至「進階設定」填入正確的 Google Sheets API 網址';
+    s.innerText = '⚠️ 系統設定錯誤，請聯繫開發人員。';
     return;
   }
 
@@ -561,7 +538,7 @@ async function submitToGoogleSheets() {
     const s = document.getElementById('submitStatus');
     s.style.display = 'block';
     s.className = 'message error';
-    s.innerText = '⚠️ 傳送失敗，請檢查 API 網址後重試';
+    s.innerText = '⚠️ 傳送失敗，請檢查網路連線後重試';
   }
 }
 </script>
