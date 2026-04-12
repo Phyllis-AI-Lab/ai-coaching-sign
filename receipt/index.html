@@ -1,0 +1,642 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>郭霽顧問 — 收款確認書</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans TC', Arial, sans-serif;
+  background: linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 100%);
+  margin: 0; padding: 20px; min-height: 100vh;
+}
+.container {
+  max-width: 780px;
+  background: white;
+  padding: 36px 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+  margin: auto;
+}
+.header-banner {
+  background: linear-gradient(135deg, #0d1b3e, #1a3a6b);
+  color: #d4a832;
+  padding: 28px 24px 20px;
+  border-radius: 8px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.header-banner h1 { margin: 0 0 4px; font-size: 1.5rem; letter-spacing: 0.1em; }
+.header-banner .sub { font-size: 0.85rem; color: #e8c96a; opacity: 0.85; margin: 4px 0 0; }
+.header-banner .notice {
+  margin-top: 12px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  color: #bbb;
+  font-style: italic;
+}
+.section-title {
+  color: #0d1b3e;
+  font-size: 1rem;
+  font-weight: 700;
+  border-left: 4px solid #d4a832;
+  padding-left: 10px;
+  margin: 24px 0 12px;
+}
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 0.9rem; }
+.form-group input, .form-group select {
+  width: 100%; padding: 9px 11px;
+  border: 1.5px solid #ddd; border-radius: 6px;
+  font-size: 0.92rem; transition: border-color 0.2s;
+  font-family: inherit;
+}
+.form-group input:focus, .form-group select:focus { outline: none; border-color: #1a3a6b; }
+.form-row { display: flex; gap: 14px; }
+.form-row .form-group { flex: 1; }
+.divider { border: none; border-top: 1.5px solid #eaecf5; margin: 22px 0; }
+
+/* 服務明細表 */
+.items-section { margin: 12px 0; }
+.items-header, .items-row {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1fr 1fr 1.1fr;
+  gap: 0;
+  font-size: 0.85rem;
+}
+.items-header {
+  background: #0d1b3e;
+  border-radius: 6px 6px 0 0;
+  overflow: hidden;
+}
+.items-header span {
+  padding: 9px 10px;
+  color: #d4a832;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.items-header span:first-child { text-align: left; }
+.items-row {
+  border-bottom: 1px solid #eee;
+}
+.items-row:nth-child(even) { background: #f8f9fd; }
+.items-row input, .items-row select {
+  border: none; background: transparent;
+  font-size: 0.85rem; padding: 8px 10px;
+  width: 100%; font-family: inherit;
+  color: #1a1a2e;
+}
+.items-row input:focus, .items-row select:focus { outline: 1px solid #1a3a6b; }
+.items-row .subtotal {
+  padding: 8px 10px; font-size: 0.85rem;
+  color: #0d1b3e; font-weight: 600;
+  text-align: right; align-self: center;
+}
+.total-block {
+  border: 1px solid #eee;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  overflow: hidden;
+}
+.total-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  background: #f5edd6;
+  border-top: 1px solid #e8d9a0;
+  align-items: center;
+}
+.total-row .label { color: #5a4a00; }
+.total-row .value { font-weight: 700; color: #0d1b3e; text-align: right; min-width: 100px; }
+.total-row.net-row { background: #fff8e6; }
+.total-row.net-row .value { font-size: 1.05rem; color: #0d1b3e; }
+.total-row.deduct-row { background: #f5edd6; }
+.total-row.deduct-row .label { font-size: 0.8rem; color: #888; }
+.total-row.deduct-row .value { font-size: 0.8rem; color: #888; }
+
+/* 付款區 */
+.payment-box {
+  background: #f8f9fd;
+  border: 1.5px solid #dde3f0;
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-top: 12px;
+}
+.payment-box label { font-size: 0.9rem; color: #333; font-weight: 600; display: block; margin-bottom: 10px; }
+.radio-group { display: flex; gap: 20px; margin-bottom: 12px; }
+.radio-group label {
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 400; font-size: 0.88rem; cursor: pointer;
+}
+.check-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.check-row label { font-weight: 400; font-size: 0.88rem; margin: 0; }
+
+/* 確認聲明 */
+.confirm-box {
+  border: 1.5px solid #dde3f0;
+  border-radius: 8px;
+  padding: 16px 18px;
+  background: #f8f9fd;
+  font-size: 0.88rem;
+  line-height: 1.75;
+  color: #2c2c2c;
+  margin-top: 12px;
+}
+.confirm-box strong { color: #0d1b3e; }
+
+/* 簽名 */
+.signature-hint { font-size: 0.82rem; color: #888; margin-bottom: 8px; }
+.signature-container { position: relative; width: 100%; height: 160px; margin-bottom: 10px; }
+.signature-box {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: 1.5px solid #c8cfe0;
+  border-radius: 6px; background: white;
+  touch-action: none; cursor: crosshair;
+}
+.signature-watermark {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: #e2e6f0; font-size: 0.85rem;
+  pointer-events: none; user-select: none;
+}
+
+/* 按鈕 */
+.btn {
+  padding: 10px 18px; border: none; cursor: pointer;
+  border-radius: 6px; font-size: 0.9rem; font-weight: 600;
+  transition: opacity 0.2s, transform 0.1s;
+  color: white; margin-top: 8px; margin-right: 8px;
+  font-family: inherit;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: linear-gradient(135deg, #0d1b3e, #1a3a6b); font-size: 1rem; padding: 13px 28px; }
+.btn-clear { background: #c0392b; }
+.btn-print { background: #27ae60; }
+.btn-download { background: #2980b9; }
+.btn-sheets { background: #8e44ad; }
+.btn-back { background: #7f8c8d; }
+
+/* 結果頁 */
+.result-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.result-info-item { background: #f8f9fd; border: 1px solid #dde3f0; border-radius: 6px; padding: 10px 14px; }
+.result-info-item .key { font-size: 0.78rem; color: #888; margin-bottom: 2px; }
+.result-info-item .val { font-size: 0.95rem; font-weight: 600; color: #0d1b3e; }
+.result-info-item.highlight { background: #fff8e6; border-color: #d4a832; }
+.result-info-item.highlight .val { color: #7a5c00; font-size: 1.05rem; }
+
+/* 結果服務明細 */
+.res-items { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 12px; }
+.res-items th { background: #0d1b3e; color: #d4a832; padding: 8px 10px; text-align: left; font-size: 0.8rem; }
+.res-items td { padding: 7px 10px; border-bottom: 1px solid #eee; color: #1a1a2e; }
+.res-items tr:nth-child(even) td { background: #f8f9fd; }
+.res-items .total-td { background: #fff8e6 !important; font-weight: 700; color: #0d1b3e; }
+.res-items .deduct-td { background: #f5edd6 !important; font-size: 0.8rem; color: #888; }
+.res-items .net-td { background: #fff8e6 !important; font-weight: 700; color: #0d1b3e; font-size: 1rem; }
+
+/* 狀態訊息 */
+.message { padding: 10px 14px; margin-top: 10px; border-radius: 6px; font-size: 0.9rem; }
+.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+#loading { display: none; text-align: center; margin-top: 14px; }
+.spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1a3a6b; border-radius: 50%; width: 32px; height: 32px; animation: spin 0.9s linear infinite; margin: 0 auto 8px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.action-buttons { margin-top: 16px; }
+
+@media (max-width: 600px) {
+  .container { padding: 20px 14px; }
+  .form-row { flex-direction: column; gap: 0; }
+  .btn { display: block; width: 100%; margin-right: 0; }
+  .result-info-grid { grid-template-columns: 1fr; }
+  .items-header, .items-row { grid-template-columns: 2fr 1fr 1fr; }
+  .items-header span:nth-child(3),
+  .items-row > *:nth-child(3) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 表單頁 ===== -->
+<div class="container" id="formContainer">
+  <div class="header-banner">
+    <h1>郭　霽　顧　問</h1>
+    <p class="sub">AI 決策架構顧問・架構先行，決策落地</p>
+    <div class="notice">本確認書由郭霽個人出具，非公司或商業登記主體開立，不具稅務扣抵效力。如需正式收據請另行告知。</div>
+  </div>
+
+  <div style="text-align:center;margin-bottom:24px">
+    <h2 style="font-size:1.3rem;font-weight:700;color:#0d1b3e;letter-spacing:.08em;margin:0">顧 問 服 務 收 款 確 認 書</h2>
+    <p style="font-size:0.82rem;color:#888;margin:6px 0 0;font-style:italic">CONSULTING SERVICE PAYMENT CONFIRMATION</p>
+  </div>
+
+  <!-- 客戶資訊 -->
+  <div class="section-title">客戶資訊</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>付款公司名稱（第一間）<span style="color:#c0392b">*</span></label>
+      <input type="text" id="company1" placeholder="例：富溢建設股份有限公司" required>
+    </div>
+    <div class="form-group">
+      <label>付款公司名稱（第二間）</label>
+      <input type="text" id="company2" placeholder="如只有一間請留空">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>簽署人姓名<span style="color:#c0392b">*</span></label>
+      <input type="text" id="signerName" required placeholder="請填入姓名">
+    </div>
+    <div class="form-group">
+      <label>職稱</label>
+      <input type="text" id="signerTitle" placeholder="例：財務長 / CFO">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>聯絡方式<span style="color:#c0392b">*</span></label>
+      <input type="text" id="contact" required placeholder="Email 或手機">
+    </div>
+    <div class="form-group">
+      <label>課程 / 專案名稱</label>
+      <input type="text" id="projectName" placeholder="例：三階段 AI 決策架構課程">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>付款日期<span style="color:#c0392b">*</span></label>
+      <input type="date" id="payDate" required>
+    </div>
+    <div class="form-group">
+      <label>確認書開立日期<span style="color:#c0392b">*</span></label>
+      <input type="date" id="issueDate" required>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- 服務明細 -->
+  <div class="section-title">服務明細</div>
+  <div class="items-section">
+    <div class="items-header">
+      <span>服務項目</span>
+      <span>付款公司</span>
+      <span>時數</span>
+      <span>單價 NT$</span>
+      <span>小計 NT$</span>
+    </div>
+    <div id="items-rows">
+      <!-- 三列由 JS 產生 -->
+    </div>
+    <div class="total-block">
+      <div class="total-row">
+        <span class="label">原始報價合計</span>
+        <span class="value" id="gross">0</span>
+      </div>
+      <div class="total-row deduct-row">
+        <span class="label">已扣二代健保補充保費（2.11%）</span>
+        <span class="value" id="deduct">−0</span>
+      </div>
+      <div class="total-row net-row">
+        <span class="label" style="font-weight:700;color:#0d1b3e">實收金額（新台幣）</span>
+        <span class="value" id="net">NT$ 0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 付款紀錄 -->
+  <div class="section-title">付款方式</div>
+  <div class="payment-box">
+    <label style="font-weight:700;color:#0d1b3e;margin-bottom:8px">付款方式</label>
+    <div class="radio-group">
+      <label><input type="radio" name="pm" value="銀行轉帳" checked> 銀行轉帳</label>
+      <label><input type="radio" name="pm" value="現金"> 現金</label>
+      <label><input type="radio" name="pm" value="其他"> 其他</label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="confirmed" checked>
+      <label for="confirmed">款項已全數收訖，本確認書即為收款憑證</label>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- 確認聲明 -->
+  <div class="section-title">確認聲明</div>
+  <div class="confirm-box">
+    <strong>客戶方簽署人茲確認：</strong><br>
+    （一）上列顧問服務已如期完成交付；<br>
+    （二）付款金額與服務明細相符；<br>
+    （三）本確認書得作為雙方往來之服務與收款憑證，電子簽署與紙本簽署具同等效力。
+  </div>
+
+  <!-- 電子簽名 -->
+  <div class="section-title">電子簽名</div>
+  <div class="signature-hint">請在下方框內以手指或滑鼠完成親筆簽名</div>
+  <div class="signature-container">
+    <canvas id="signatureCanvas" class="signature-box"></canvas>
+    <div class="signature-watermark">在此處簽名</div>
+  </div>
+  <button class="btn btn-clear" onclick="clearSignature()">清除簽名</button>
+
+  <hr class="divider">
+  <button class="btn btn-primary" onclick="submitForm()">確認並提交簽署</button>
+
+  <!-- Google Sheets webhook URL — 填入您的 Apps Script 部署網址 -->
+  <input type="hidden" id="sheetsURL" value="YOUR_GOOGLE_APPS_SCRIPT_URL">
+</div>
+
+<!-- ===== 結果頁 ===== -->
+<div class="container" id="resultContainer" style="display:none">
+  <div class="header-banner">
+    <h1>✅ 簽署完成</h1>
+    <p class="sub">感謝您完成收款確認書簽署</p>
+  </div>
+
+  <div class="result-info-grid">
+    <div class="result-info-item"><div class="key">付款公司（第一間）</div><div class="val" id="res-c1"></div></div>
+    <div class="result-info-item"><div class="key">付款公司（第二間）</div><div class="val" id="res-c2">—</div></div>
+    <div class="result-info-item"><div class="key">簽署人</div><div class="val" id="res-signer"></div></div>
+    <div class="result-info-item"><div class="key">職稱</div><div class="val" id="res-title">—</div></div>
+    <div class="result-info-item"><div class="key">付款方式</div><div class="val" id="res-pm"></div></div>
+    <div class="result-info-item"><div class="key">付款日期</div><div class="val" id="res-paydate"></div></div>
+    <div class="result-info-item highlight"><div class="key">原始報價合計</div><div class="val" id="res-gross"></div></div>
+    <div class="result-info-item highlight"><div class="key">實收金額（已扣健保費）</div><div class="val" id="res-net"></div></div>
+  </div>
+
+  <div class="section-title">服務明細</div>
+  <table class="res-items" id="res-items-table">
+    <thead><tr><th>服務項目</th><th>付款公司</th><th>時數</th><th>單價</th><th style="text-align:right">小計</th></tr></thead>
+    <tbody id="res-items-body"></tbody>
+  </table>
+
+  <div class="section-title">電子簽名</div>
+  <img id="resSignature" style="border:1.5px solid #c8cfe0;border-radius:6px;width:100%;height:160px;object-fit:contain;background:white;display:block;">
+
+  <div id="submitStatus" class="message" style="display:none"></div>
+  <div id="loading"><div class="spinner"></div><p style="color:#555;font-size:0.9rem">正在傳送資料至 Google Sheets…</p></div>
+
+  <div class="action-buttons">
+    <button class="btn btn-print" onclick="window.print()">🖨️ 列印</button>
+    <button class="btn btn-download" onclick="downloadPDF()">⬇️ 下載 PDF</button>
+    <button class="btn btn-sheets" onclick="submitToSheets()">📊 存入 Google Sheets</button>
+    <button class="btn btn-back" onclick="goBack()">← 返回表單</button>
+  </div>
+</div>
+
+<script>
+let jsPDF;
+window.addEventListener('load', () => {
+  if (window.jspdf && window.jspdf.jsPDF) jsPDF = window.jspdf.jsPDF;
+  else if (window.jsPDF) jsPDF = window.jsPDF;
+  resizeCanvas();
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('issueDate').value = today;
+  document.getElementById('payDate').value = '2026-04-07';
+  document.getElementById('company1').value = '富溢建設股份有限公司';
+  document.getElementById('company2').value = '富潑建設股份有限公司';
+  document.getElementById('signerName').value = '周○○';
+  document.getElementById('signerTitle').value = '財務長';
+  document.getElementById('projectName').value = 'Session 1–3 AI 決策架構三階段課程';
+  document.querySelector('input[name=pm][value="銀行轉帳"]').checked = true;
+  document.getElementById('confirmed').checked = true;
+  renderItemRows();
+});
+
+// ── 服務明細列 ──
+const DEFAULT_ITEMS = [
+  { name: 'Session 1 架構思維 + Session 2 系統藍圖', company: '1', hours: '6', price: '34000' },
+  { name: 'Session 3 決策戰情室實作', company: '2', hours: '3', price: '34000' },
+  { name: '', company: '1', hours: '', price: '0' },
+];
+
+function renderItemRows() {
+  const tbody = document.getElementById('items-rows');
+  tbody.innerHTML = '';
+  DEFAULT_ITEMS.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'items-row';
+    row.id = 'irow-' + i;
+    row.innerHTML = `
+      <input type="text" id="i${i}n" value="${item.name}" placeholder="服務項目">
+      <select id="i${i}c">
+        <option value="1" ${item.company==='1'?'selected':''}>第一間</option>
+        <option value="2" ${item.company==='2'?'selected':''}>第二間</option>
+        <option value="兩間均攤">兩間均攤</option>
+      </select>
+      <input type="number" id="i${i}h" value="${item.hours}" min="0" step="0.5" style="text-align:center">
+      <input type="number" id="i${i}p" value="${item.price}" min="0" step="1000" oninput="calcTotal()" style="text-align:right">
+      <span class="subtotal" id="i${i}s">${Number(item.price).toLocaleString()}</span>
+    `;
+    tbody.appendChild(row);
+  });
+  calcTotal();
+}
+
+function calcTotal() {
+  let gross = 0;
+  for (let i = 0; i < 3; i++) {
+    const p = parseFloat(document.getElementById('i' + i + 'p')?.value) || 0;
+    if (document.getElementById('i' + i + 's')) {
+      document.getElementById('i' + i + 's').textContent = p.toLocaleString();
+    }
+    gross += p;
+  }
+  const deduct = Math.round(gross * 0.0211);
+  const net = gross - deduct;
+  document.getElementById('gross').textContent = 'NT$ ' + gross.toLocaleString();
+  document.getElementById('deduct').textContent = '−NT$ ' + deduct.toLocaleString();
+  document.getElementById('net').textContent = 'NT$ ' + net.toLocaleString();
+}
+
+// ── 簽名板 ──
+const canvas = document.getElementById('signatureCanvas');
+const ctx = canvas.getContext('2d');
+let isDrawing = false, lastX = 0, lastY = 0;
+
+function resizeCanvas() {
+  const w = canvas.parentElement.clientWidth;
+  canvas.width = w; canvas.height = 160;
+  ctx.fillStyle = 'white'; ctx.fillRect(0, 0, w, 160);
+  ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#1a1a2e';
+}
+window.addEventListener('resize', resizeCanvas);
+
+function drawLine(x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+
+canvas.addEventListener('mousedown', e => { isDrawing=true; const r=canvas.getBoundingClientRect(); lastX=e.clientX-r.left; lastY=e.clientY-r.top; });
+canvas.addEventListener('mousemove', e => { if(!isDrawing)return; const r=canvas.getBoundingClientRect(); const x=e.clientX-r.left,y=e.clientY-r.top; drawLine(lastX,lastY,x,y); lastX=x; lastY=y; });
+canvas.addEventListener('mouseup', ()=>isDrawing=false);
+canvas.addEventListener('mouseleave', ()=>isDrawing=false);
+canvas.addEventListener('touchstart', e=>{ e.preventDefault(); if(e.touches.length!==1)return; const t=e.touches[0],r=canvas.getBoundingClientRect(); lastX=t.clientX-r.left; lastY=t.clientY-r.top; isDrawing=true; },{passive:false});
+canvas.addEventListener('touchmove', e=>{ e.preventDefault(); if(!isDrawing||e.touches.length!==1)return; const t=e.touches[0],r=canvas.getBoundingClientRect(); const x=t.clientX-r.left,y=t.clientY-r.top; drawLine(lastX,lastY,x,y); lastX=x; lastY=y; },{passive:false});
+canvas.addEventListener('touchend', e=>{ e.preventDefault(); isDrawing=false; },{passive:false});
+document.body.addEventListener('touchmove', e=>{ if(isDrawing)e.preventDefault(); },{passive:false});
+
+function clearSignature() { ctx.fillStyle='white'; ctx.fillRect(0,0,canvas.width,canvas.height); }
+function hasSignature() { const d=ctx.getImageData(0,0,canvas.width,canvas.height).data; for(let i=0;i<d.length;i+=4){if(d[i]<250||d[i+1]<250||d[i+2]<250)return true;} return false; }
+
+// ── 提交 ──
+function submitForm() {
+  const req = ['company1','signerName','contact','payDate','issueDate'];
+  for (const f of req) {
+    if (!document.getElementById(f).value.trim()) { alert('請填寫所有必填欄位（標有 * 者）'); return; }
+  }
+  if (!hasSignature()) { alert('請完成電子簽名後再提交'); return; }
+
+  const c1 = document.getElementById('company1').value;
+  const c2 = document.getElementById('company2').value;
+  const pm = document.querySelector('input[name=pm]:checked')?.value || '—';
+
+  document.getElementById('res-c1').textContent = c1;
+  document.getElementById('res-c2').textContent = c2 || '—';
+  document.getElementById('res-signer').textContent = document.getElementById('signerName').value;
+  document.getElementById('res-title').textContent = document.getElementById('signerTitle').value || '—';
+  document.getElementById('res-pm').textContent = pm;
+  document.getElementById('res-paydate').textContent = document.getElementById('payDate').value;
+  document.getElementById('res-gross').textContent = document.getElementById('gross').textContent;
+  document.getElementById('res-net').textContent = document.getElementById('net').textContent;
+
+  // 明細
+  const tbody = document.getElementById('res-items-body');
+  tbody.innerHTML = '';
+  let gross = 0;
+  for (let i = 0; i < 3; i++) {
+    const n = document.getElementById('i'+i+'n').value;
+    const co = document.getElementById('i'+i+'c');
+    const coText = co ? co.options[co.selectedIndex].text : '—';
+    const h = document.getElementById('i'+i+'h').value;
+    const p = parseFloat(document.getElementById('i'+i+'p').value)||0;
+    if (!n && !p) continue;
+    gross += p;
+    tbody.innerHTML += `<tr><td>${n}</td><td>${coText==='第一間'?c1:coText==='第二間'?c2||'第二間':coText}</td><td style="text-align:center">${h}hr</td><td style="text-align:right">${p.toLocaleString()}</td><td style="text-align:right">${p.toLocaleString()}</td></tr>`;
+  }
+  const deduct = Math.round(gross*0.0211);
+  const net = gross - deduct;
+  tbody.innerHTML += `<tr><td colspan="4" class="total-td" style="text-align:right">原始報價合計</td><td class="total-td" style="text-align:right">NT$ ${gross.toLocaleString()}</td></tr>`;
+  tbody.innerHTML += `<tr><td colspan="4" class="deduct-td" style="text-align:right;font-size:0.8rem">已扣二代健保補充保費 2.11%</td><td class="deduct-td" style="text-align:right;font-size:0.8rem">−NT$ ${deduct.toLocaleString()}</td></tr>`;
+  tbody.innerHTML += `<tr><td colspan="4" class="net-td" style="text-align:right">實收金額</td><td class="net-td" style="text-align:right">NT$ ${net.toLocaleString()}</td></tr>`;
+
+  document.getElementById('resSignature').src = canvas.toDataURL();
+  document.getElementById('formContainer').style.display = 'none';
+  document.getElementById('resultContainer').style.display = 'block';
+  document.getElementById('submitStatus').style.display = 'none';
+  window.scrollTo(0,0);
+}
+
+function goBack() {
+  document.getElementById('formContainer').style.display = 'block';
+  document.getElementById('resultContainer').style.display = 'none';
+}
+
+// ── PDF 下載 ──
+function downloadPDF() {
+  const el = document.getElementById('resultContainer');
+  html2canvas(el, { scale:2, useCORS:true, backgroundColor:'#ffffff' }).then(c => {
+    if (!jsPDF) { alert('PDF 函式庫尚未載入，請稍後再試'); return; }
+    const img = c.toDataURL('image/png');
+    const pdf = new jsPDF('p','mm','a4');
+    const w = 210, h = c.height * w / c.width;
+    let y = 0;
+    while (y < h) {
+      if (y > 0) pdf.addPage();
+      pdf.addImage(img, 'PNG', 0, -y, w, h);
+      y += 297;
+    }
+    const signer = document.getElementById('signerName').value || '客戶';
+    const date = document.getElementById('issueDate').value;
+    pdf.save(`郭霽顧問_收款確認書_${signer}_${date}.pdf`);
+  }).catch(() => alert('PDF 生成失敗，請使用列印功能另存 PDF'));
+}
+
+// ── 存入 Google Sheets ──
+async function compressSig(dataURL) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      const max = 300;
+      let w = img.width, h = img.height;
+      if (w > max) { h = Math.round(h*max/w); w = max; }
+      c.width = w; c.height = h;
+      const cx = c.getContext('2d');
+      cx.fillStyle='white'; cx.fillRect(0,0,w,h);
+      cx.drawImage(img,0,0,w,h);
+      res(c.toDataURL('image/jpeg',0.65));
+    };
+    img.onerror = rej;
+    img.src = dataURL;
+  });
+}
+
+async function submitToSheets() {
+  const sheetsURL = document.getElementById('sheetsURL').value;
+  if (!sheetsURL || sheetsURL.includes('YOUR_GOOGLE')) {
+    const s = document.getElementById('submitStatus');
+    s.style.display='block'; s.className='message error';
+    s.innerHTML='⚠️ 尚未設定 Google Sheets 連結，請聯繫 Phyllis 設定後端。';
+    return;
+  }
+  document.getElementById('loading').style.display='block';
+  document.getElementById('submitStatus').style.display='none';
+
+  const sig = await compressSig(canvas.toDataURL());
+  const items = [];
+  for (let i=0;i<3;i++) {
+    const n = document.getElementById('i'+i+'n').value;
+    const p = parseFloat(document.getElementById('i'+i+'p').value)||0;
+    const co = document.getElementById('i'+i+'c');
+    const coVal = co?.value;
+    const c1 = document.getElementById('company1').value;
+    const c2 = document.getElementById('company2').value;
+    items.push({ name:n, company: coVal==='1'?c1:coVal==='2'?c2:coVal, hours:document.getElementById('i'+i+'h').value, price:p });
+  }
+  const gross = items.reduce((s,it)=>s+it.price,0);
+  const deduct = Math.round(gross*0.0211);
+
+  const data = {
+    company1: document.getElementById('company1').value,
+    company2: document.getElementById('company2').value,
+    signerName: document.getElementById('signerName').value,
+    signerTitle: document.getElementById('signerTitle').value,
+    contact: document.getElementById('contact').value,
+    projectName: document.getElementById('projectName').value,
+    payDate: document.getElementById('payDate').value,
+    issueDate: document.getElementById('issueDate').value,
+    payMethod: document.querySelector('input[name=pm]:checked')?.value||'—',
+    grossAmount: gross,
+    deductAmount: deduct,
+    netAmount: gross-deduct,
+    items: JSON.stringify(items),
+    signature: sig,
+    secretKey: 'PhyllisReceipt2026'
+  };
+
+  try {
+    await fetch(sheetsURL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+    document.getElementById('loading').style.display='none';
+    const s = document.getElementById('submitStatus');
+    s.style.display='block'; s.className='message success';
+    s.textContent='✅ 資料已成功傳送至 Google Sheets！';
+  } catch(err) {
+    document.getElementById('loading').style.display='none';
+    const s = document.getElementById('submitStatus');
+    s.style.display='block'; s.className='message error';
+    s.textContent='⚠️ 傳送失敗，請檢查網路連線後重試。';
+  }
+}
+</script>
+</body>
+</html>
