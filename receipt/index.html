@@ -449,7 +449,7 @@ function calcTotal() {
     }
     gross += p;
   }
-  const deduct = Math.round(gross * 0.0211);
+  const deduct = Math.floor(gross * 0.0211);
   const net = gross - deduct;
   document.getElementById('gross').textContent = 'NT$ ' + gross.toLocaleString();
   document.getElementById('deduct').textContent = '−NT$ ' + deduct.toLocaleString();
@@ -519,7 +519,7 @@ function submitForm() {
     gross += p;
     tbody.innerHTML += `<tr><td>${n}</td><td>${coText==='第一間'?c1:coText==='第二間'?c2||'第二間':coText}</td><td style="text-align:center">${h}hr</td><td style="text-align:right">${p.toLocaleString()}</td><td style="text-align:right">${p.toLocaleString()}</td></tr>`;
   }
-  const deduct = Math.round(gross*0.0211);
+  const deduct = Math.floor(gross*0.0211);
   const net = gross - deduct;
   tbody.innerHTML += `<tr><td colspan="4" class="total-td" style="text-align:right">原始報價合計</td><td class="total-td" style="text-align:right">NT$ ${gross.toLocaleString()}</td></tr>`;
   tbody.innerHTML += `<tr><td colspan="4" class="deduct-td" style="text-align:right;font-size:0.8rem">已扣二代健保補充保費 2.11%</td><td class="deduct-td" style="text-align:right;font-size:0.8rem">−NT$ ${deduct.toLocaleString()}</td></tr>`;
@@ -600,7 +600,7 @@ async function submitToSheets() {
     items.push({ name:n, company: coVal==='1'?c1:coVal==='2'?c2:coVal, hours:document.getElementById('i'+i+'h').value, price:p });
   }
   const gross = items.reduce((s,it)=>s+it.price,0);
-  const deduct = Math.round(gross*0.0211);
+  const deduct = Math.floor(gross*0.0211);
 
   const data = {
     company1: document.getElementById('company1').value,
