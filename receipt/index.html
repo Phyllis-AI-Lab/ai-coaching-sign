@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -525,6 +526,8 @@ function submitForm() {
   tbody.innerHTML += `<tr><td colspan="4" class="net-td" style="text-align:right">實收金額</td><td class="net-td" style="text-align:right">NT$ ${net.toLocaleString()}</td></tr>`;
 
   document.getElementById('resSignature').src = canvas.toDataURL();
+  // 儲存簽名供 submitToSheets 使用
+  window.__savedSignature = canvas.toDataURL();
   document.getElementById('formContainer').style.display = 'none';
   document.getElementById('resultContainer').style.display = 'block';
   document.getElementById('submitStatus').style.display = 'none';
@@ -587,7 +590,7 @@ async function submitToSheets() {
   document.getElementById('loading').style.display='block';
   document.getElementById('submitStatus').style.display='none';
 
-  const sig = await compressSig(canvas.toDataURL());
+  const sig = await compressSig(window.__savedSignature || canvas.toDataURL());
   const items = [];
   for (let i=0;i<3;i++) {
     const n = document.getElementById('i'+i+'n').value;
@@ -622,7 +625,7 @@ async function submitToSheets() {
   try {
     await fetch(sheetsURL, {
       method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify(data)
     });
     document.getElementById('loading').style.display='none';
