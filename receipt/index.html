@@ -7,7 +7,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    /* CSS 樣式保留原本設計 */
     * { box-sizing: border-box; }
     body { font-family: 'Noto Sans TC', Arial, sans-serif; background: linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 100%); margin: 0; padding: 20px; min-height: 100vh; }
     .container { max-width: 780px; background: white; padding: 36px 32px; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.35); margin: auto; }
@@ -79,6 +78,18 @@
     #loading { display: none; text-align: center; margin-top: 14px; }
     .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1a3a6b; border-radius: 50%; width: 32px; height: 32px; animation: spin 0.9s linear infinite; margin: 0 auto 8px; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* 修正結果頁圖片大小，移除固定高度讓圖片較大 */
+    #resSignature { 
+      border: 1.5px solid #c8cfe0; 
+      border-radius: 6px; 
+      width: 100%; 
+      object-fit: cover; 
+      background: white; 
+      display: block;
+      margin-top: 10px;
+    }
+
     @media (max-width: 600px) {
       .container { padding: 20px 14px; }
       .form-row { flex-direction: column; gap: 0; }
@@ -181,7 +192,7 @@
     <tbody id="res-items-body"></tbody>
   </table>
   <div class="section-title">電子簽名</div>
-  <img id="resSignature" style="border:1.5px solid #c8cfe0;border-radius:6px;width:100%;height:160px;object-fit:contain;background:white;display:block;">
+  <img id="resSignature">
   <div id="submitStatus" class="message" style="display:none"></div>
   <div id="loading"><div class="spinner"></div><p style="color:#555;font-size:0.9rem">正在傳送資料至 Google Sheets…</p></div>
   <div class="action-buttons">
@@ -203,14 +214,11 @@ const DEFAULT_ITEMS = [
   { name: '', company: '兩間均攤', hours: '', price: '0' },
 ];
 
-// --- 核心防呆機制：確保 HTML 完全載入後才執行 JS ---
 document.addEventListener("DOMContentLoaded", function() {
   try {
-    // 1. 綁定 PDF
     if (window.jspdf && window.jspdf.jsPDF) jsPDF = window.jspdf.jsPDF;
     else if (window.jsPDF) jsPDF = window.jsPDF;
 
-    // 2. 初始化畫布 (如果沒抓到元素，程式不會崩潰)
     canvas = document.getElementById('signatureCanvas');
     if (canvas) {
       ctx = canvas.getContext('2d');
@@ -219,7 +227,6 @@ document.addEventListener("DOMContentLoaded", function() {
       window.addEventListener('resize', resizeCanvas);
     }
 
-    // 3. 填寫預設表單資料
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('issueDate').value = today;
     document.getElementById('payDate').value = '2026-04-07';
@@ -233,16 +240,13 @@ document.addEventListener("DOMContentLoaded", function() {
     if(pmRadio) pmRadio.checked = true;
     document.getElementById('confirmed').checked = true;
 
-    // 4. 渲染明細表
     renderItemRows();
 
   } catch (error) {
-    // 如果有任何致命錯誤，直接顯示在畫面上讓我知道！
-    alert("初始化發生錯誤，請截圖給工程師：" + error.message);
+    alert("初始化發生錯誤：" + error.message);
   }
 });
 
-// --- 功能函數 ---
 function renderItemRows() {
   const tbody = document.getElementById('items-rows');
   if(!tbody) return;
@@ -283,14 +287,14 @@ function calcTotal() {
   document.getElementById('net').textContent = 'NT$ ' + net.toLocaleString();
 }
 
-// --- 簽名板功能 ---
 function resizeCanvas() {
   if(!canvas) return;
   const w = canvas.parentElement.clientWidth;
   canvas.width = w; canvas.height = 160;
   ctx.fillStyle = 'white'; ctx.fillRect(0, 0, w, 160);
   ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.strokeStyle = '#1a1a2e';
+  // 修正筆觸顏色為純黑色
+  ctx.strokeStyle = '#000000';
 }
 
 function drawLine(x1, y1, x2, y2) { 
@@ -344,7 +348,6 @@ function hasSignature() {
   return false; 
 }
 
-// --- 提交與結果處理 ---
 function submitForm() {
   const req = ['company1','signerName','contact','payDate','issueDate'];
   for (const f of req) {
