@@ -53,12 +53,10 @@
     .signature-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #e2e6f0; font-size: 0.85rem; pointer-events: none; user-select: none; }
     .btn { padding: 10px 18px; border: none; cursor: pointer; border-radius: 6px; font-size: 0.9rem; font-weight: 600; transition: opacity 0.2s, transform 0.1s; color: white; margin-top: 8px; margin-right: 8px; font-family: inherit; }
     .btn:active { transform: scale(0.97); }
-    .btn-primary { background: linear-gradient(135deg, #0d1b3e, #1a3a6b); font-size: 1rem; padding: 13px 28px; }
+    .btn-primary { background: linear-gradient(135deg, #0d1b3e, #1a3a6b); font-size: 1rem; padding: 13px 28px; width: 100%; margin-top: 16px; }
     .btn-clear { background: #c0392b; }
     .btn-print { background: #27ae60; }
     .btn-download { background: #2980b9; }
-    .btn-sheets { background: #8e44ad; }
-    .btn-back { background: #7f8c8d; }
     .result-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
     .result-info-item { background: #f8f9fd; border: 1px solid #dde3f0; border-radius: 6px; padding: 10px 14px; }
     .result-info-item .key { font-size: 0.78rem; color: #888; margin-bottom: 2px; }
@@ -72,14 +70,7 @@
     .res-items .total-td { background: #fff8e6 !important; font-weight: 700; color: #0d1b3e; }
     .res-items .deduct-td { background: #f5edd6 !important; font-size: 0.8rem; color: #888; }
     .res-items .net-td { background: #fff8e6 !important; font-weight: 700; color: #0d1b3e; font-size: 1rem; }
-    .message { padding: 10px 14px; margin-top: 10px; border-radius: 6px; font-size: 0.9rem; }
-    .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    #loading { display: none; text-align: center; margin-top: 14px; }
-    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1a3a6b; border-radius: 50%; width: 32px; height: 32px; animation: spin 0.9s linear infinite; margin: 0 auto 8px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
     
-    /* 修正結果頁圖片大小，移除固定高度讓圖片較大 */
     #resSignature { 
       border: 1.5px solid #c8cfe0; 
       border-radius: 6px; 
@@ -89,6 +80,18 @@
       display: block;
       margin-top: 10px;
     }
+
+    /* 全螢幕讀取遮罩 */
+    #loadingOverlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(13, 27, 62, 0.85); z-index: 9999; flex-direction: column;
+      justify-content: center; align-items: center; color: white;
+    }
+    .spinner-large { 
+      border: 5px solid rgba(255,255,255,0.3); border-top: 5px solid #d4a832; 
+      border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; 
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 600px) {
       .container { padding: 20px 14px; }
@@ -101,6 +104,11 @@
   </style>
 </head>
 <body>
+
+<div id="loadingOverlay">
+  <div class="spinner-large"></div>
+  <div style="font-size: 1.1rem; letter-spacing: 0.05em;">資料加密傳送中，請稍候...</div>
+</div>
 
 <div class="container" id="formContainer">
   <div class="header-banner">
@@ -170,12 +178,12 @@
   <button class="btn btn-clear" onclick="clearSignature()">清除簽名</button>
   
   <hr class="divider">
-  <button class="btn btn-primary" onclick="submitForm()">確認並提交簽署</button>
+  <button class="btn btn-primary" onclick="submitAndSave()">確認並提交簽署</button>
   <input type="hidden" id="sheetsURL" value="https://script.google.com/macros/s/AKfycbwti-8V9FDvzdpULMvQ7D047DOFjF24bt4K8bt604hRfO4QKF5xs4NhFgI83fAW0Ujktw/exec">
 </div>
 
 <div class="container" id="resultContainer" style="display:none">
-  <div class="header-banner"><h1>✅ 簽署完成</h1><p class="sub">感謝您完成收款確認書簽署</p></div>
+  <div class="header-banner"><h1>✅ 簽署完成</h1><p class="sub">資料已成功備份。感謝您的配合！</p></div>
   <div class="result-info-grid">
     <div class="result-info-item"><div class="key">付款公司（第一間）</div><div class="val" id="res-c1"></div></div>
     <div class="result-info-item"><div class="key">付款公司（第二間）</div><div class="val" id="res-c2"></div></div>
@@ -193,13 +201,10 @@
   </table>
   <div class="section-title">電子簽名</div>
   <img id="resSignature">
-  <div id="submitStatus" class="message" style="display:none"></div>
-  <div id="loading"><div class="spinner"></div><p style="color:#555;font-size:0.9rem">正在傳送資料至 Google Sheets…</p></div>
-  <div class="action-buttons">
+  
+  <div class="action-buttons" style="margin-top: 24px; text-align: center;">
+    <button class="btn btn-download" onclick="downloadPDF()">⬇️ 下載本頁 PDF 留存</button>
     <button class="btn btn-print" onclick="window.print()">🖨️ 列印</button>
-    <button class="btn btn-download" onclick="downloadPDF()">⬇️ 下載 PDF</button>
-    <button class="btn btn-sheets" onclick="submitToSheets()">📊 存入 Google Sheets</button>
-    <button class="btn btn-back" onclick="goBack()">← 返回表單</button>
   </div>
 </div>
 
@@ -208,6 +213,7 @@
 let canvas, ctx, jsPDF;
 let isDrawing = false, lastX = 0, lastY = 0;
 
+// 周子晴專用版的明細預設值
 const DEFAULT_ITEMS = [
   { name: 'Session 1 架構思維 + Session 2 系統藍圖', company: '兩間均攤', hours: '6', price: '34000' },
   { name: 'Session 3 決策戰情室實作', company: '兩間均攤', hours: '3', price: '34000' },
@@ -230,13 +236,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('issueDate').value = today;
     document.getElementById('payDate').value = '2026-04-07';
+    
+    // 【專用版設定】帶入雙公司與周子晴的資料
     document.getElementById('company1').value = '富濲建設股份有限公司';
-    document.getElementById('company2').value = '富濲建設股份有限公司';
+    document.getElementById('company2').value = '富溢建設股份有限公司';
     document.getElementById('signerName').value = '周子晴';
     document.getElementById('signerTitle').value = '財務長';
     document.getElementById('projectName').value = 'Session 1–3 AI 決策架構三階段課程';
     
-    const pmRadio = document.querySelector('input[name=pm][value="銀行轉帳"]');
+    // 【專用版設定】預設勾選現金
+    const pmRadio = document.querySelector('input[name=pm][value="現金"]');
     if(pmRadio) pmRadio.checked = true;
     document.getElementById('confirmed').checked = true;
 
@@ -293,8 +302,7 @@ function resizeCanvas() {
   canvas.width = w; canvas.height = 160;
   ctx.fillStyle = 'white'; ctx.fillRect(0, 0, w, 160);
   ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  // 修正筆觸顏色為純黑色
-  ctx.strokeStyle = '#000000';
+  ctx.strokeStyle = '#000000'; // 黑筆
 }
 
 function drawLine(x1, y1, x2, y2) { 
@@ -348,76 +356,6 @@ function hasSignature() {
   return false; 
 }
 
-function submitForm() {
-  const req = ['company1','signerName','contact','payDate','issueDate'];
-  for (const f of req) {
-    if (!document.getElementById(f).value.trim()) { alert('請填寫所有必填欄位（標有 * 者）'); return; }
-  }
-  if (!hasSignature()) { alert('請完成電子簽名後再提交'); return; }
-
-  const c1 = document.getElementById('company1').value;
-  const c2 = document.getElementById('company2').value;
-  const pm = document.querySelector('input[name=pm]:checked')?.value || '—';
-
-  document.getElementById('res-c1').textContent = c1;
-  document.getElementById('res-c2').textContent = c2 || '—';
-  document.getElementById('res-signer').textContent = document.getElementById('signerName').value;
-  document.getElementById('res-title').textContent = document.getElementById('signerTitle').value || '—';
-  document.getElementById('res-pm').textContent = pm;
-  document.getElementById('res-paydate').textContent = document.getElementById('payDate').value;
-  document.getElementById('res-gross').textContent = document.getElementById('gross').textContent;
-  document.getElementById('res-net').textContent = document.getElementById('net').textContent;
-
-  const tbody = document.getElementById('res-items-body');
-  tbody.innerHTML = '';
-  let gross = 0;
-  for (let i = 0; i < 3; i++) {
-    const n = document.getElementById('i'+i+'n').value;
-    const co = document.getElementById('i'+i+'c');
-    const coText = co ? co.options[co.selectedIndex].text : '—';
-    const h = document.getElementById('i'+i+'h').value;
-    const p = parseFloat(document.getElementById('i'+i+'p').value)||0;
-    if (!n && !p) continue;
-    gross += p;
-    tbody.innerHTML += `<tr><td>${n}</td><td>${coText==='第一間'?c1:coText==='第二間'?c2||'第二間':coText}</td><td style="text-align:center">${h}hr</td><td style="text-align:right">${p.toLocaleString()}</td><td style="text-align:right">${p.toLocaleString()}</td></tr>`;
-  }
-  const deduct = Math.floor(gross*0.0211);
-  const net = gross - deduct;
-  tbody.innerHTML += `<tr><td colspan="4" class="total-td" style="text-align:right">原始報價合計</td><td class="total-td" style="text-align:right">NT$ ${gross.toLocaleString()}</td></tr>`;
-  tbody.innerHTML += `<tr><td colspan="4" class="deduct-td" style="text-align:right;font-size:0.8rem">已扣二代健保補充保費 2.11%</td><td class="deduct-td" style="text-align:right;font-size:0.8rem">−NT$ ${deduct.toLocaleString()}</td></tr>`;
-  tbody.innerHTML += `<tr><td colspan="4" class="net-td" style="text-align:right">實收金額</td><td class="net-td" style="text-align:right">NT$ ${net.toLocaleString()}</td></tr>`;
-
-  document.getElementById('resSignature').src = canvas.toDataURL();
-  document.getElementById('formContainer').style.display = 'none';
-  document.getElementById('resultContainer').style.display = 'block';
-  document.getElementById('submitStatus').style.display = 'none';
-  window.scrollTo(0,0);
-}
-
-function goBack() {
-  document.getElementById('formContainer').style.display = 'block';
-  document.getElementById('resultContainer').style.display = 'none';
-}
-
-function downloadPDF() {
-  const el = document.getElementById('resultContainer');
-  html2canvas(el, { scale:2, useCORS:true, backgroundColor:'#ffffff' }).then(c => {
-    if (!jsPDF) { alert('PDF 函式庫尚未載入，請稍後再試'); return; }
-    const img = c.toDataURL('image/png');
-    const pdf = new jsPDF('p','mm','a4');
-    const w = 210, h = c.height * w / c.width;
-    let y = 0;
-    while (y < h) {
-      if (y > 0) pdf.addPage();
-      pdf.addImage(img, 'PNG', 0, -y, w, h);
-      y += 297;
-    }
-    const signer = document.getElementById('signerName').value || '客戶';
-    const date = document.getElementById('issueDate').value;
-    pdf.save(`郭霽顧問_收款確認書_${signer}_${date}.pdf`);
-  }).catch(() => alert('PDF 生成失敗，請使用列印功能另存 PDF'));
-}
-
 async function compressSig(dataURL) {
   return new Promise((res, rej) => {
     const img = new Image();
@@ -437,62 +375,115 @@ async function compressSig(dataURL) {
   });
 }
 
-async function submitToSheets() {
-  const sheetsURL = document.getElementById('sheetsURL').value;
-  if (!sheetsURL || sheetsURL.includes('YOUR_GOOGLE')) {
-    alert('尚未設定 Google Sheets 連結！'); return;
+// ── 核心：一鍵自動流程 ──
+async function submitAndSave() {
+  const req = ['company1','signerName','contact','payDate','issueDate'];
+  for (const f of req) {
+    if (!document.getElementById(f).value.trim()) { alert('請填寫所有必填欄位（標有 * 者）'); return; }
   }
-  document.getElementById('loading').style.display='block';
-  document.getElementById('submitStatus').style.display='none';
+  if (!hasSignature()) { alert('請完成電子簽名後再提交'); return; }
 
-  const sig = await compressSig(canvas.toDataURL());
-  const items = [];
-  for (let i=0;i<3;i++) {
+  // 1. 顯示全螢幕讀取遮罩
+  document.getElementById('loadingOverlay').style.display = 'flex';
+
+  // 2. 準備前端結果頁的資料
+  const c1 = document.getElementById('company1').value;
+  const c2 = document.getElementById('company2').value;
+  const pm = document.querySelector('input[name=pm]:checked')?.value || '—';
+
+  document.getElementById('res-c1').textContent = c1;
+  document.getElementById('res-c2').textContent = c2 || '—';
+  document.getElementById('res-signer').textContent = document.getElementById('signerName').value;
+  document.getElementById('res-title').textContent = document.getElementById('signerTitle').value || '—';
+  document.getElementById('res-pm').textContent = pm;
+  document.getElementById('res-paydate').textContent = document.getElementById('payDate').value;
+  document.getElementById('res-gross').textContent = document.getElementById('gross').textContent;
+  document.getElementById('res-net').textContent = document.getElementById('net').textContent;
+
+  const tbody = document.getElementById('res-items-body');
+  tbody.innerHTML = '';
+  let gross = 0;
+  const itemsForDB = [];
+  
+  for (let i = 0; i < 3; i++) {
     const n = document.getElementById('i'+i+'n').value;
-    const p = parseFloat(document.getElementById('i'+i+'p').value)||0;
     const co = document.getElementById('i'+i+'c');
     const coVal = co?.value;
-    const c1 = document.getElementById('company1').value;
-    const c2 = document.getElementById('company2').value;
-    items.push({ name:n, company: coVal==='1'?c1:coVal==='2'?c2:coVal, hours:document.getElementById('i'+i+'h').value, price:p });
+    const coText = co ? co.options[co.selectedIndex].text : '—';
+    const h = document.getElementById('i'+i+'h').value;
+    const p = parseFloat(document.getElementById('i'+i+'p').value)||0;
+    if (!n && !p) continue;
+    gross += p;
+    tbody.innerHTML += `<tr><td>${n}</td><td>${coText==='第一間'?c1:coText==='第二間'?c2||'第二間':coText}</td><td style="text-align:center">${h}hr</td><td style="text-align:right">${p.toLocaleString()}</td><td style="text-align:right">${p.toLocaleString()}</td></tr>`;
+    
+    itemsForDB.push({ name:n, company: coVal==='1'?c1:coVal==='2'?c2:coVal, hours:h, price:p });
   }
-  const gross = items.reduce((s,it)=>s+it.price,0);
+  
   const deduct = Math.floor(gross*0.0211);
+  const net = gross - deduct;
+  tbody.innerHTML += `<tr><td colspan="4" class="total-td" style="text-align:right">原始報價合計</td><td class="total-td" style="text-align:right">NT$ ${gross.toLocaleString()}</td></tr>`;
+  tbody.innerHTML += `<tr><td colspan="4" class="deduct-td" style="text-align:right;font-size:0.8rem">已扣二代健保補充保費 2.11%</td><td class="deduct-td" style="text-align:right;font-size:0.8rem">−NT$ ${deduct.toLocaleString()}</td></tr>`;
+  tbody.innerHTML += `<tr><td colspan="4" class="net-td" style="text-align:right">實收金額</td><td class="net-td" style="text-align:right">NT$ ${net.toLocaleString()}</td></tr>`;
 
-  const data = {
-    company1: document.getElementById('company1').value,
-    company2: document.getElementById('company2').value,
+  const sigDataURL = canvas.toDataURL();
+  document.getElementById('resSignature').src = sigDataURL;
+
+  // 3. 準備發送給 Google Sheets 的資料包
+  const sheetsURL = document.getElementById('sheetsURL').value;
+  const sigCompressed = await compressSig(sigDataURL);
+  
+  const dbData = {
+    company1: c1, company2: c2,
     signerName: document.getElementById('signerName').value,
     signerTitle: document.getElementById('signerTitle').value,
     contact: document.getElementById('contact').value,
     projectName: document.getElementById('projectName').value,
     payDate: document.getElementById('payDate').value,
     issueDate: document.getElementById('issueDate').value,
-    payMethod: document.querySelector('input[name=pm]:checked')?.value||'—',
-    grossAmount: gross,
-    deductAmount: deduct,
-    netAmount: gross-deduct,
-    items: JSON.stringify(items),
-    signature: sig,
+    payMethod: pm,
+    grossAmount: gross, deductAmount: deduct, netAmount: net,
+    items: JSON.stringify(itemsForDB),
+    signature: sigCompressed,
     secretKey: 'PhyllisReceipt2026'
   };
 
+  // 4. 背景發送資料
   try {
     await fetch(sheetsURL, {
       method:'POST',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify(data)
+      body: JSON.stringify(dbData)
     });
-    document.getElementById('loading').style.display='none';
-    const s = document.getElementById('submitStatus');
-    s.style.display='block'; s.className='message success';
-    s.textContent='✅ 資料已成功傳送至 Google Sheets！';
+    
+    // 發送成功後，關閉遮罩並切換到結果頁
+    document.getElementById('loadingOverlay').style.display = 'none';
+    document.getElementById('formContainer').style.display = 'none';
+    document.getElementById('resultContainer').style.display = 'block';
+    window.scrollTo(0,0);
+
   } catch(err) {
-    document.getElementById('loading').style.display='none';
-    const s = document.getElementById('submitStatus');
-    s.style.display='block'; s.className='message error';
-    s.textContent='⚠️ 傳送失敗，請檢查網路連線或後端設定。';
+    document.getElementById('loadingOverlay').style.display = 'none';
+    alert('⚠️ 系統繁忙或網路連線失敗，請再試一次。');
   }
+}
+
+function downloadPDF() {
+  const el = document.getElementById('resultContainer');
+  html2canvas(el, { scale:2, useCORS:true, backgroundColor:'#ffffff' }).then(c => {
+    if (!jsPDF) { alert('PDF 函式庫尚未載入，請稍後再試'); return; }
+    const img = c.toDataURL('image/png');
+    const pdf = new jsPDF('p','mm','a4');
+    const w = 210, h = c.height * w / c.width;
+    let y = 0;
+    while (y < h) {
+      if (y > 0) pdf.addPage();
+      pdf.addImage(img, 'PNG', 0, -y, w, h);
+      y += 297;
+    }
+    const signer = document.getElementById('res-signer').textContent || '客戶';
+    const date = document.getElementById('res-paydate').textContent || '確認書';
+    pdf.save(`郭霽顧問_收款確認書_${signer}_${date}.pdf`);
+  }).catch(() => alert('PDF 生成失敗，請使用列印功能另存 PDF'));
 }
 </script>
 </body>
